@@ -1,0 +1,46 @@
+#micro-chat-container {
+    height: 85vh;
+    position: relative;
+    overflow: hidden;
+}
+
+#micro-chat-content {
+    max-height: 90%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+#micro-chat-form-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+#micro-chat-spinner {
+    text-align: center;
+}
+
+#micro-chat-notification {
+    position: absolute;
+    text-align: center;
+    top: 0;
+    z-index: 1049;
+    width: 100%;
+}
+
+#micro-chat-users-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1048;
+}
+
+#micro-chat-users-open-toggle, #micro-chat-users-close-toggle {
+    float: right;
+}
+
+#micro-chat-users-list-container {
+    width: 400px;
+    float: right;
+    display: none;
+}

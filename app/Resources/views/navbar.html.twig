@@ -1,0 +1,50 @@
+<nav id="micro-chat-navbar" class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#micro-chat-navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ path('homepage') }}">MICRO CHAT</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="micro-chat-navbar-collapse">
+            <ul class="nav navbar-nav">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li><a href="#" data-toggle="modal" data-target="#micro-chat-wash-modal">Nettoyer la conversation</a></li>
+                {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if is_granted('ROLE_USER') %}
+                    <li><span class="navbar-text">Hi {{ app.user.username }} !</span></li>
+                    <li><a href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a></li>
+                {% else %}
+                    <li><a href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% if is_granted('ROLE_ADMIN') %}
+    <div id="micro-chat-wash-modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Nettoyer la conversation</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Vous êtes sur le point de supprimer tous les messages de la conversation, cette action est irréversible.</p>
+                    <p>Voulez vous vraiment continuer ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" onclick="washConversation();" data-dismiss="modal">Nettoyer</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+{% endif %}

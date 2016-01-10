@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('bundles/app/css/bootstrap.min.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/app/css/font-awesome.min.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/app/css/animate.min.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/app/css/micro_chat.css') }}">
+        {% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    </head>
+    <body>
+        <div id="container" class="container">
+            {% include 'navbar.html.twig' %}
+            {% block body %}{% endblock %}
+        </div>
+
+        {% block javascripts %}
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+        {% endblock %}
+    </body>
+</html>

@@ -1,0 +1,24 @@
+{% extends '::base.html.twig' %}
+{% trans_default_domain 'FOSUserBundle' %}
+
+{% block title %}Micro Chat{% endblock %}
+
+{% block body %}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        {% include ':default:micro_chat.html.twig' %}
+    {% else %}
+        <div class="alert alert-warning">
+            <h4>Out of order</h4>
+            <p>If you want to text here you must be logged !</p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        {% include '::ajax_js_routes.js.twig' %}
+        <script src="{{ asset('bundles/app/js/micro_chat.js') }}"></script>
+    {% endif %}
+{% endblock %}
