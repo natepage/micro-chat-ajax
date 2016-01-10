@@ -14,7 +14,7 @@ class ChatManager
 {
     const USER_STATUS_ONLINE = 'online';
     const USER_STATUS_ABSENT = 'absent';
-    const TIME_BEFORE_ABSENT = 2;
+    const TIME_BEFORE_ABSENT = 10;
     const TIME_BEFORE_AUTO_LOGOUT = 30;
 
     /**
@@ -55,6 +55,11 @@ class ChatManager
     /**
      * @var string
      */
+    private $noConnectedTemplate = ':messages:no_connected.html.twig';
+
+    /**
+     * @var string
+     */
     private $notificationTemplate = ':messages:notification.html.twig';
 
     /**
@@ -73,32 +78,42 @@ class ChatManager
     {
         $user = $this->tokenStorage->getToken()->getUser();
 
-        $message = new Message();
-        $message->setContent($request->request->get('content'));
-        $message->setUser($user);
+        if($this->userIsConnected($user)){
+            $message = new Message();
+            $message->setContent($request->request->get('content'));
+            $message->setUser($user);
 
-        $this->em->persist($message);
-        $this->em->flush();
+            $this->em->persist($message);
+            $this->em->flush();
 
-        $this->updateUserStatus($user);
+            $this->updateUserStatus($user);
 
-        return $this->getMessages();
+            return $this->getMessages();
+        }
+
+        return array('render' => $this->templating->render($this->noConnectedTemplate));
     }
 
     public function getMessages()
     {
         $render = '';
-        $messages = $this->em->getRepository($this->messageRepository)->findLastsMessages();
+        $user = $this->tokenStorage->getToken()->getUser();
 
-        foreach($messages as $message){
-            $render .= $this->templating->render($this->messageTemplate, array('message' => $message));
+        if($this->userIsConnected($user)){
+            $messages = $this->em->getRepository($this->messageRepository)->findLastsMessages();
+
+            foreach($messages as $message){
+                $render .= $this->templating->render($this->messageTemplate, array('message' => $message));
+            }
+
+            if($render == ''){
+                $render = $this->templating->render($this->emptyTemplate);
+            }
+        } else {
+            $render = $this->templating->render($this->noConnectedTemplate);
         }
 
-        if($render == ''){
-            $render = $this->templating->render($this->emptyTemplate);
-        }
-
-        return $render;
+        return array('render' => $render);
     }
 
     public function washConversation()
@@ -111,10 +126,12 @@ class ChatManager
 
         $this->em->flush();
 
-        return $this->templating->render($this->notificationTemplate, array(
+        $render = $this->templating->render($this->notificationTemplate, array(
             'type' => 'success',
             'content' => 'Conversation nettoyée.'
         ));
+
+        return array('render' => $render);
     }
 
     public function updateUserStatus(UserInterface $user)
@@ -131,6 +148,8 @@ class ChatManager
 
         $this->em->persist($status);
         $this->em->flush();
+
+        return $this->getMessages();
     }
 
     public function removeUserStatus(UserInterface $user)
@@ -145,42 +164,41 @@ class ChatManager
 
     public function getUsers()
     {
-        $users = $this->findUsersWithRefreshListStatus();
+        $user = $this->tokenStorage->getToken()->getUser();
+
         $render = array(
+            'number' => 0,
             'render' => '',
             'notifications' => array()
         );
 
-        foreach($users['status'] as $status){
-            $render['render'] .= $this->templating->render($this->statusUserTemplate, array('status' => $status));
+        if($this->userIsConnected($user)){
+            $users = $this->findUsersWithRefreshListStatus($user);
+
+            $render['number'] = count($users['status']);
+
+            foreach($users['status'] as $status){
+                $render['render'] .= $this->templating->render($this->statusUserTemplate, array('status' => $status));
+            }
         }
 
-        foreach($users['connected'] as $connected){
-            $render['notifications'][] = $this->templating->render($this->notificationTemplate, array(
-                'type' => 'info',
-                'content' => $connected . ' has joined conversation'
-            ));
-        }
-
-        foreach($users['deconnected'] as $deconnected){
-            $render['notifications'][] = $this->templating->render($this->notificationTemplate, array(
-                'type' => 'info',
-                'content' => $deconnected . ' has left conversation'
-            ));
-        }
-
-        return array(
-            'number' => count($users['status']),
-            'render' => $render['render'],
-            'notifications' => $render['notifications']
-        );
+        return $render;
     }
 
-    private function findUsersWithRefreshListStatus()
+    public function disconnectUser(UserInterface $user)
+    {
+        $status = $this->em->getRepository($this->statusRepository)->findOneBy(array('username' => $user->getUsername()));
+
+        if(!null === $status){
+            $status->setJustDeconnected(true);
+            $this->em->flush();
+        }
+    }
+
+    private function findUsersWithRefreshListStatus(UserInterface $user)
     {
         $users = array(
             'status' => array(),
-            'connected' => array(),
             'deconnected' => array()
         );
 
@@ -190,19 +208,14 @@ class ChatManager
         foreach($listStatus as $status){
             $diff = $now->diff($status->getLastMessage())->i;
 
-            if($status->getJustConnected()){
-                $users['connected'][] = $status->getUsername();
-                $status->setJustConnected(false);
-            }
-
             if($diff > self::TIME_BEFORE_ABSENT && $diff < self::TIME_BEFORE_AUTO_LOGOUT){
                 $status->setStatus(self::USER_STATUS_ABSENT);
             } elseif($diff > self::TIME_BEFORE_AUTO_LOGOUT){
-                $users['deconnected'][] = $status->getUsername();
+                $users['deconnected'] = $status->getUsername();
                 $this->em->remove($status);
             }
 
-            if(!in_array($status->getUsername(), $users['deconnected'])){
+            if(!in_array($status->getUsername(), $users['deconnected']) && $status->getUsername() != $user->getUsername()){
                 $users['status'][] = $status;
             }
         }
@@ -210,5 +223,16 @@ class ChatManager
         $this->em->flush();
 
         return $users;
+    }
+
+    private function userIsConnected(UserInterface $user)
+    {
+        $status = $this->em->getRepository($this->statusRepository)->findOneBy(array('username' => $user->getUsername()));
+
+        if(null === $status){
+            return false;
+        }
+
+        return !$status->getJustDeconnected();
     }
 }

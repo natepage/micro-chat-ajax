@@ -38,7 +38,7 @@ class AfterLogoutRedirection implements LogoutSuccessHandlerInterface
      */
     public function onLogoutSuccess(Request $request)
     {
-        $this->chatManager->removeUserStatus($this->tokenStorage->getToken()->getUser());
+        $this->chatManager->disconnectUser($this->tokenStorage->getToken()->getUser());
 
         return new RedirectResponse($this->router->generate('homepage'));
     }

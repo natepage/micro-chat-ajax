@@ -44,6 +44,13 @@ class UserStatus
     private $justConnected;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="justDeconnected", type="boolean", options={"default": false})
+     */
+    private $justDeconnected;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="status", type="string", length=255)
@@ -55,6 +62,7 @@ class UserStatus
         $this->lastMessage = new \DateTime();
         $this->status = ChatManager::USER_STATUS_ONLINE;
         $this->justConnected = true;
+        $this->justDeconnected = false;
     }
 
     /**
@@ -161,6 +169,30 @@ class UserStatus
     public function getJustConnected()
     {
         return $this->justConnected;
+    }
+
+    /**
+     * Set justDeconnected
+     *
+     * @param $justDeconnected
+     *
+     * @return UserStatus
+     */
+    public function setJustDeconnected($justDeconnected)
+    {
+        $this->justDeconnected = $justDeconnected;
+
+        return $this;
+    }
+
+    /**
+     * Get justDeconnected
+     *
+     * @return bool
+     */
+    public function getJustDeconnected()
+    {
+        return $this->justDeconnected;
     }
 }
 

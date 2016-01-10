@@ -25,9 +25,7 @@ class AjaxController extends Controller
 
         $manager = $this->get('micro_chat.chat_manager');
 
-        return new JsonResponse(array(
-            'render' => $manager->send($request)
-        ));
+        return new JsonResponse($manager->send($request));
     }
 
     /**
@@ -42,9 +40,7 @@ class AjaxController extends Controller
 
         $manager = $this->get('micro_chat.chat_manager');
 
-        return new JsonResponse(array(
-            'render' => $manager->getMessages()
-        ));
+        return new JsonResponse($manager->getMessages());
     }
 
     /**
@@ -59,9 +55,7 @@ class AjaxController extends Controller
 
         $manager = $this->get('micro_chat.chat_manager');
 
-        return new JsonResponse(array(
-            'render' => $manager->washConversation()
-        ));
+        return new JsonResponse($manager->washConversation());
     }
 
     /**
@@ -77,5 +71,20 @@ class AjaxController extends Controller
         $manager = $this->get('micro_chat.chat_manager');
 
         return new JsonResponse($manager->getUsers());
+    }
+
+    /**
+     * @Method({"GET"})
+     * @Route("/update/user", name="ajax_update_user")
+     */
+    public function updateUserAction(Request $request)
+    {
+        if(!$request->isXmlHttpRequest()){
+            throw $this->createNotFoundException();
+        }
+
+        $manager = $this->get('micro_chat.chat_manager');
+
+        return new JsonResponse($manager->updateUserStatus($this->getUser()));
     }
 }

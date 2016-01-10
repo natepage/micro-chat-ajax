@@ -39,6 +39,10 @@
     float: right;
 }
 
+#micro-chat-users-close-toggle {
+    margin-top: -3px;
+}
+
 #micro-chat-users-list-container {
     width: 400px;
     float: right;

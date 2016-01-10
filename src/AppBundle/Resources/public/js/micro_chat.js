@@ -52,10 +52,6 @@ $(document).ready(function(){
                 } else {
                     usersPlurial.html('');
                 }
-
-                for(i = 0; i < datas.notifications.length; i++){
-                    addNotification(datas.notifications[i]);
-                }
             },
             error: function(){
                 console.log('ERROR');
@@ -110,6 +106,25 @@ $(document).ready(function(){
         });
     });
 });
+
+/**
+ * Refresh user connexion
+ */
+function userUpdateConnexionLink()
+{
+    console.log('Reconnexion');
+
+    $.ajax({
+        method: 'GET',
+        url: updateUserPath,
+        success: function(datas){
+            content.html(datas.render);
+        },
+        error: function(){
+            console.log('ERROR');
+        }
+    });
+}
 
 function washConversation()
 {
