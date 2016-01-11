@@ -19,6 +19,7 @@
 
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         {% include '::ajax_js_routes.js.twig' %}
+        <script src="{{ asset('bundles/app/js/visibility.js') }}"></script>
         <script src="{{ asset('bundles/app/js/micro_chat.js') }}"></script>
     {% endif %}
 {% endblock %}

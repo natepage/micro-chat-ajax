@@ -87,4 +87,19 @@ class AjaxController extends Controller
 
         return new JsonResponse($manager->updateUserStatus($this->getUser()));
     }
+
+    /**
+     * @Method({"GET"})
+     * @Route("/status/all", name="ajax_status_all")
+     */
+    public function statusAllAction(Request $request)
+    {
+        if(!$request->isXmlHttpRequest()){
+            throw $this->createNotFoundException();
+        }
+
+        $manager = $this->get('micro_chat.chat_manager');
+
+        return new JsonResponse($manager->getAllStatus());
+    }
 }

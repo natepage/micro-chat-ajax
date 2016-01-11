@@ -10,6 +10,17 @@
     overflow-y: scroll;
 }
 
+.micro-chat-row {
+    border-bottom: 1px dashed #2c3e50;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+}
+
+.micro-chat-conversation-label {
+    margin-right: 5px;
+    font-size: 14px;
+}
+
 #micro-chat-form-container {
     position: absolute;
     bottom: 0;

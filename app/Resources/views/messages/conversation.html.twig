@@ -1,4 +1,6 @@
 <div class="micro-chat-row">
-    <span class="label label-default">{{ message.user.username }} ({{ message.date|date(message.dateformat) }})</span>
+    <span class="label label-default micro-chat-conversation-label">
+        {{ message.user.username }} - {{ message.date|date(message.dateformat) }}
+    </span>
     <span>{{ message.content }}</span>
 </div>

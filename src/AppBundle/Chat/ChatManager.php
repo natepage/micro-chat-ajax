@@ -156,7 +156,7 @@ class ChatManager
     {
         $status = $this->em->getRepository($this->statusRepository)->findOneBy(array('username' => $user->getUsername()));
 
-        if(!null === $status){
+        if(null !== $status){
             $this->em->remove($status);
             $this->em->flush();
         }
@@ -165,6 +165,7 @@ class ChatManager
     public function getUsers()
     {
         $user = $this->tokenStorage->getToken()->getUser();
+        $users = $this->findUsersWithRefreshListStatus($user);
 
         $render = array(
             'number' => 0,
@@ -173,8 +174,6 @@ class ChatManager
         );
 
         if($this->userIsConnected($user)){
-            $users = $this->findUsersWithRefreshListStatus($user);
-
             $render['number'] = count($users['status']);
 
             foreach($users['status'] as $status){
@@ -189,16 +188,29 @@ class ChatManager
     {
         $status = $this->em->getRepository($this->statusRepository)->findOneBy(array('username' => $user->getUsername()));
 
-        if(!null === $status){
+        if(null !== $status){
             $status->setJustDeconnected(true);
             $this->em->flush();
         }
+    }
+
+    public function getAllStatus()
+    {
+        $listStatus = $this->em->getRepository($this->statusRepository)->findAll();
+        $arrayStatus = array();
+
+        foreach($listStatus as $status){
+            $arrayStatus[] = $status->toArray();
+        }
+
+        return $arrayStatus;
     }
 
     private function findUsersWithRefreshListStatus(UserInterface $user)
     {
         $users = array(
             'status' => array(),
+            'connected' => array(),
             'deconnected' => array()
         );
 
@@ -206,12 +218,22 @@ class ChatManager
         $now = new \DateTime();
 
         foreach($listStatus as $status){
-            $diff = $now->diff($status->getLastMessage())->i;
+            $diff = $this->getMinutesInterval($now, $status->getLastMessage());
+
+            if($status->getJustConnected()){
+                $users['connected'][] = $status->getUsername();
+                $status->setJustConnected(false);
+            }
+
+            if($status->getJustDeconnected()){
+                $users['deconnected'][] = $status->getUsername();
+                $this->em->remove($status);
+            }
 
             if($diff > self::TIME_BEFORE_ABSENT && $diff < self::TIME_BEFORE_AUTO_LOGOUT){
                 $status->setStatus(self::USER_STATUS_ABSENT);
             } elseif($diff > self::TIME_BEFORE_AUTO_LOGOUT){
-                $users['deconnected'] = $status->getUsername();
+                $users['deconnected'][] = $status->getUsername();
                 $this->em->remove($status);
             }
 
@@ -234,5 +256,15 @@ class ChatManager
         }
 
         return !$status->getJustDeconnected();
+    }
+
+    private function getMinutesInterval(\DateTime $now, \DateTime $lastMessage)
+    {
+        $diff = $now->diff($lastMessage);
+        $days   = (int) $diff->format('%d');
+        $hours   = (int) $diff->format('%h');
+        $minutes = (int) $diff->format('%i');
+
+        return ($hours * 60 + $minutes) + ($days * 24 * 60);
     }
 }

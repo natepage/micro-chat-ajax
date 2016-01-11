@@ -194,5 +194,21 @@ class UserStatus
     {
         return $this->justDeconnected;
     }
+
+    /**
+     * Get array representation
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return array(
+            'lastMessage' => $this->lastMessage->format('d/m/Y H:i:s'),
+            'username' => $this->username,
+            'status' => $this->status,
+            'justConnected' => $this->justConnected,
+            'justDeconnected' => $this->justDeconnected
+        );
+    }
 }
 

@@ -14,50 +14,18 @@ var usersPlurial = $('#micro-chat-users-plurial');
 
 $(document).ready(function(){
     /**
-     * Get Messages
+     * Initial calls
      */
-    var getMessages = setInterval(function(){
-        $.ajax({
-            method: 'GET',
-            url: messagesPath,
-            success: function(datas){
-                spinner.hide();
-                content.html(datas.render);
-                container.removeClass('hidden');
-            },
-            error: function(){
-                console.log('ERROR');
-            }
-        });
-    }, 3000);
+    getMessages();
+    getUsers();
+    handleScroll();
 
     /**
-     * Get Users
+     * Intervals
      */
-    var getUsers = setInterval(function(){
-        $.ajax({
-            method: 'GET',
-            url: usersPath,
-            success: function(datas){
-                usersNumber.html(datas.number);
-
-                if(datas.number > 0){
-                    usersList.html(datas.render);
-                } else {
-                    usersList.html('');
-                }
-
-                if(datas.number > 1){
-                    usersPlurial.html('s');
-                } else {
-                    usersPlurial.html('');
-                }
-            },
-            error: function(){
-                console.log('ERROR');
-            }
-        });
-    }, 3000);
+    var scroll = setInterval('handleScroll()', 300);
+    var messages = setInterval('getMessages()', 5000);
+    var users = setInterval('getMessages()', 10000);
 
     /**
      * Form submit handler
@@ -105,15 +73,90 @@ $(document).ready(function(){
             usersOpenToggle.show();
         });
     });
+
+    vis(function(){
+        document.title = vis() ? 'Visible' : 'Not visible';
+    });
 });
+
+/**
+ * Handle scroll
+ */
+function handleScroll()
+{
+    content.scrollTop(content.prop('scrollHeight'));
+}
+
+/**
+ * Get messages
+ */
+function getMessages()
+{
+    $.ajax({
+        method: 'GET',
+        url: messagesPath,
+        success: function(datas){
+            spinner.hide();
+            content.html(datas.render);
+            container.removeClass('hidden');
+        },
+        error: function(){
+            console.log('ERROR');
+        }
+    });
+}
+
+/**
+ * Get users
+ */
+function getUsers()
+{
+    $.ajax({
+        method: 'GET',
+        url: usersPath,
+        success: function(datas){
+            usersNumber.html(datas.number);
+
+            if(datas.number > 0){
+                usersList.html(datas.render);
+            } else {
+                usersList.html('');
+            }
+
+            if(datas.number > 1){
+                usersPlurial.html('s');
+            } else {
+                usersPlurial.html('');
+            }
+        },
+        error: function(){
+            console.log('ERROR');
+        }
+    });
+}
+
+/**
+ * Get all status
+ */
+function getAllStatus()
+{
+    $.ajax({
+        method: 'GET',
+        url: statusAllPath,
+        success: function(datas){
+            console.log(datas);
+        },
+        error: function(){
+            console.log('ERROR');
+        }
+    });
+}
 
 /**
  * Refresh user connexion
  */
 function userUpdateConnexionLink()
 {
-    console.log('Reconnexion');
-
     $.ajax({
         method: 'GET',
         url: updateUserPath,

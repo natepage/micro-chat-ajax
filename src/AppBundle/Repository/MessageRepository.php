@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 /**
  * MessageRepository
  *
@@ -15,9 +17,9 @@ class MessageRepository extends \Doctrine\ORM\EntityRepository
         $q = $this->createQueryBuilder('m')
                   ->leftJoin('m.user', 'u')
                   ->addSelect('u')
-                  ->setMaxResults($nbMax)
-                  ->orderBy('m.date', 'asc');
+                  ->orderBy('m.date', 'desc')
+                  ->setMaxResults($nbMax);
 
-        return $q->getQuery()->getResult();
+        return array_reverse($q->getQuery()->getResult());
     }
 }
